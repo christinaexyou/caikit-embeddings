@@ -27,21 +27,9 @@ RUN chown -R 1000:0 /data1 && \
     chgrp -R 0 /data1 && \
     chmod -R g=u /data1
 
-COPY --chown=1000:0 all-MiniLM-L12-v2-caikit   ${MODEL_DIR}/all-MiniLM-L12-v2-caikit/
-
-
-USER 1000
-
-# Image with additional models used in the FVTs
-FROM minio-examples as minio-fvt
-
-ARG FVT_DIR=/data1/modelmesh-example-models/fvt
-
-USER root
-
-COPY --chown=1000:0 fvt ${FVT_DIR}/
-
-# some models are duplicated for FVT testing and verification
-COPY --chown=1000:0 all-MiniLM-L12-v2-caikit             ${FVT_DIR}/all-MiniLM-L12-v2-caikit/
+COPY --chown=1000:0  models/hf ${MODEL_DIR}/models/hf/
+COPY --chown=1000:0  models/baai ${MODEL_DIR}/models/baai/
+COPY --chown=1000:0  models/microsoft ${MODEL_DIR}/models/microsoft/
+# COPY --chown=1000:0 <YOURMODEL> ${MODEL_DIR}
 
 USER 1000

@@ -21,4 +21,4 @@ if __name__ == "__main__":
     model_name_or_path, output_path = _parse_args()
     print("MODEL NAME OR PATH: ", model_name_or_path)
     print("OUTPUT PATH:        ", output_path)
-    EmbeddingModule(model_name_or_path).save(output_path)
+    EmbeddingModule.bootstrap(model_name_or_path).save(output_path)

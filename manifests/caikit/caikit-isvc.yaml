@@ -12,5 +12,5 @@ spec:
     model:
       modelFormat:
         name: caikit
-      runtime: caikit-runtime
-      storageUri: s3://modelmesh-example-models/llm/all-MiniLM-L12-v2-caikit
+      runtime: caikit-standalone-runtime
+      storageUri: s3://modelmesh-example-models
