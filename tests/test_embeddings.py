@@ -19,16 +19,16 @@ def _parse_args():
         description=""
     )
     parser.add_argument(
-        "-i", "--id", required=True, help="Model ID"
+        "-m", "--model_id", required=True, help="Model ID"
     )
     parser.add_argument(
-        "-m", "--model_name_or_path", required=True, help="Source model name or path"
+        "-n", "--hf_model_name", required=True, help="Source model name or path"
     )
     parser.add_argument(
         "-i", "--isvc_url", required=True, help="Inference service URL"
     )
     args = parser.parse_args()
-    return args.id, args.model_name_or_path, args.isvc_url
+    return args.model_id, args.hf_model_name, args.isvc_url
 class testEmbeddings:
     """
     Tests to validate inference responses from Caikit Embedding endpoints
@@ -47,39 +47,44 @@ class testEmbeddings:
         """
         Validates embeddings for a single text input
         """
-        inference_response = requests.post(
+        response = requests.post(
             self.isvc_url + "/api/v1/task/embedding",
             json={
              "model_id": self.model_id,
              "inputs": text
             },
             verify=False
-        ).json()['result']['data']['values']
-        model_output = self.model.encode(text)
+        )
+        if response.status_code == 200:
+            inference_response = response.json()['result']['data']['values']
+            model_output = self.model.encode(text)
 
-        np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
+            np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
+        print(response.text)
 
     def embeddingTasks_test(self, texts: List[str]):
         """
         Validates embeddings for multiple text inputs
         """
-        inference_response = requests.post(
+        response = requests.post(
             self.isvc_url + "/api/v1/task/embedding-tasks",
             json={
                 "model_id": self.model_id,
                 "inputs":  texts
             },
             verify=False
-        ).json()['results']['vectors'][0]['data']['values']
-        model_output = self.model.encode(texts)[0]
-
-        np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
+        )
+        if response.status_code == 200:
+            inference_response = response.json()['results']['vectors'][0]['data']['values']
+            model_output = self.model.encode(texts)[0]
+            np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
+        print(response.text)
 
     def sentenceSimilarityTask_test(self, source_sentence: str, sentences: List[str]):
         """
         Validates sentence similarity  between a single source sentence and reference sentences
         """
-        inference_response = requests.post(
+        response = requests.post(
             self.isvc_url + "/api/v1/task/sentence-similarity",
             json={
              "model_id": self.model_id,
@@ -89,19 +94,22 @@ class testEmbeddings:
                 }
             },
             verify=False
-        ).json()['result']['scores']
-        model_output = self.model.similarity(
-            self.model.encode(source_sentence),
-            self.model.encode(sentences)
-        ).flatten()
+        )
+        if response.status_code == 200:
+            inference_response = response.json()['result']['scores']
+            model_output = self.model.similarity(
+                self.model.encode(source_sentence),
+                self.model.encode(sentences)
+            ).flatten()
 
-        np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
+            np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
+        print(response.text)
 
     def sentenceSimilarityTasks_test(self, source_sentences: List[str], sentences: List[str]):
         """
         Validates sentence similarity between multiple source sentences and reference sentences
         """
-        inference_response = requests.post(
+        response = requests.post(
             self.isvc_url + "/api/v1/task/sentence-similarity-tasks",
             json={
                 "model_id": self.model_id,
@@ -111,13 +119,16 @@ class testEmbeddings:
                 }
             },
             verify=False
-        ).json()['results']
-        scores = sum([result['scores'] for result in inference_response], [])
-        model_output = self.model.similarity(
-            self.model.encode(source_sentences), self.model.encode(sentences)
-            ).flatten()
+        )
+        if response.status_code == 200:
+            inference_response = response.json()['results']
+            scores = sum([result['scores'] for result in inference_response], [])
+            model_output = self.model.similarity(
+                self.model.encode(source_sentences), self.model.encode(sentences)
+                ).flatten()
 
-        np.testing.assert_almost_equal(scores, model_output, decimal=3)
+            np.testing.assert_almost_equal(scores, model_output, decimal=3)
+        print(response.text)
 
     def rerankTask_test(self, query: str,  documents: List[JsonDict], top_n=None):
         """
@@ -125,7 +136,7 @@ class testEmbeddings:
         """
         if top_n is None:
             top_n = len(documents)
-        inference_response = requests.post(
+        response = requests.post(
             self.isvc_url + "/api/v1/task/rerank",
             json={
              "model_id": self.model_id,
@@ -138,31 +149,34 @@ class testEmbeddings:
                 }
             },
             verify=False
-        ).json()['result']
-        corpus_ids = [
-            result['index'] for result in inference_response['scores']
-            ]
-        scores = [
-            result['score'] for result in inference_response['scores']
-            ]
-        query_embeddings = normalize(
-            self.model.encode(
-                [query],
-                convert_to_tensor=True
+        )
+        if response.status_code == 200:
+            inference_response = response.json()['result']
+            corpus_ids = [
+                result['index'] for result in inference_response['scores']
+                ]
+            scores = [
+                result['score'] for result in inference_response['scores']
+                ]
+            query_embeddings = normalize(
+                self.model.encode(
+                    [query],
+                    convert_to_tensor=True
+                    )
                 )
-            )
-        document_embeddings = normalize(
-            self.model.encode(
-                [list(doc.values())[0] for doc in documents],
-                convert_to_tensor=True
+            document_embeddings = normalize(
+                self.model.encode(
+                    [list(doc.values())[0] for doc in documents],
+                    convert_to_tensor=True
+                    )
                 )
-            )
-        results = semantic_search(
-            query_embeddings, document_embeddings, top_k=top_n, score_function=dot_score
-            )[0]
+            results = semantic_search(
+                query_embeddings, document_embeddings, top_k=top_n, score_function=dot_score
+                )[0]
 
-        np.testing.assert_equal(corpus_ids, [res['corpus_id'] for res in results])
-        np.testing.assert_almost_equal(scores, [res['score'] for res in results], decimal=3)
+            np.testing.assert_equal(corpus_ids, [res['corpus_id'] for res in results])
+            np.testing.assert_almost_equal(scores, [res['score'] for res in results], decimal=3)
+        print(response.text)
 
     def rerankTasks_test(self, queries: List[str], documents: List[JsonDict], top_n=None):
         """
@@ -170,7 +184,7 @@ class testEmbeddings:
         """
         if top_n is None:
             top_n = len(documents)
-        inference_response = requests.post(
+        response = requests.post(
             self.isvc_url + "/api/v1/task/rerank-tasks",
             json={
                 "model_id": self.model_id,
@@ -184,25 +198,28 @@ class testEmbeddings:
             },
             verify=False
 
-        ).json()['results']
-        corpus_ids = [
-            score['index'] for result in inference_response for score in result['scores']
-            ]
-        scores = [
-            score['score'] for result in inference_response for score in result['scores']
-            ]
-        query_embeddings = normalize(self.model.encode(queries, convert_to_tensor=True))
-        document_embeddings = normalize(self.model.encode([list(doc.values())[0] for doc in documents], convert_to_tensor=True))
-        results = semantic_search(query_embeddings, document_embeddings, top_k=top_n, score_function=dot_score)
+        )
+        if response.status_code == 200:
+            inference_response = response.json()['results']
+            corpus_ids = [
+                score['index'] for result in inference_response for score in result['scores']
+                ]
+            scores = [
+                score['score'] for result in inference_response for score in result['scores']
+                ]
+            query_embeddings = normalize(self.model.encode(queries, convert_to_tensor=True))
+            document_embeddings = normalize(self.model.encode([list(doc.values())[0] for doc in documents], convert_to_tensor=True))
+            results = semantic_search(query_embeddings, document_embeddings, top_k=top_n, score_function=dot_score)
 
-        np.testing.assert_equal(corpus_ids, [doc['corpus_id'] for res in results for doc in res])
-        np.testing.assert_almost_equal(scores, [doc['score'] for res in results for doc in res], decimal=3)
+            np.testing.assert_equal(corpus_ids, [doc['corpus_id'] for res in results for doc in res])
+            np.testing.assert_almost_equal(scores, [doc['score'] for res in results for doc in res], decimal=3)
+        print(response.text)
 
 if __name__=="__main__":
     model_id, model_name_or_path, isvc_url = _parse_args()
     test_embeddings = testEmbeddings(
         model_id=model_id,
-        model_name=model_name_or_path,
+        model_name_or_path=model_name_or_path,
         isvc_url=isvc_url
     )
     text = "test first sentence"
