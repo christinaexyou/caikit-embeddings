@@ -74,14 +74,14 @@ Replace the following sections in `manifests/caikit/caikit-isvc.yaml`
   .
   .
   .
-  name: <isvc_name>
+  name: <ISVC_NAME>
 ```
 
 ```
       .
       .
       .
-      storageUri: <model_directory>
+      storageUri: <MODEL_PATH>
 ```
 Deploy the inference service
 ```
@@ -114,32 +114,49 @@ oc delete ns ${MINIO_NS}
 ```
 
 ## Testing
-The following open source embeddings models have already been built as container images and pushed to Quay:
+The following open source embeddings models have already been containerized [here](quay.io/christinaexyou/modelmesh-minio-examples:embedding-models):
 * all-minilm-l12-v2
 * bge-large-en-v1.5
 * multilingual-e5-large
 
-To test them, follow the instructions starting from [Edit Minio manifest](#edit-minio-manifest) and replace the image URI with one of the following:
-* quay.io/repository/christinaexyou/modelmesh-minio-examples/all-MiniLM-L12-v2-caikit
-* quay.io/repository/christinaexyou/modelmesh-minio-examples/multilingual-e5-large-caikit
-* quay.io/repository/christinaexyou/modelmesh-minio-examples/bge-large-en-v1.5-caikit
+### Prerequisites
+* You have cloned this repository and set your working directory to the root
+    ```
+    https://github.com/christinaexyou/caikit-embeddings.git
+    cd caikit-embeddings
+    ```
 
-Follow the rest of the steps to create an inference service and stop at [Make an inference request](#make-an-inference-request) and continue the following steps.
+### Procedure
+1. Set the `TARGET_OPERATOR` to either `rhods` or `odh`. For example:
+    ```
+    export TARGET_OPERATOR=rhods
+    ```
 
-### Install required libraries
-```
-pip install -r tests/requirements.txt
-```
+2. Deploy embeddings models
 
-### Run test
-Replace the `<model_name_or_path>` with its HuggingFace name
-```
-ISVC_URL=$(oc get ksvc $ISVC_NAME -n $TEST_NS -o jsonpath='{.status.url}' | cut -d'/' -f3)
+    For HTTP:
+    ```
+    tests/scripts/deploy-model.sh
+    ```
 
-python tests/test_embeddings.py -m=$MODEL_NAME - -n=<model_name_or_path> -i=$ISVC_URL
-```
+    For gRPC
+    ```
+    tests/scripts/deploy-model.sh grpc
+    ```
 
-For example:
-```
-python tests/test_embeddings.py -m=$MODEL_NAME -n="sentence-transformers/all-MiniLM-L12-v2" -i=$ISVC_URL
-```
+3. Validate inference responses
+
+    For HTTP:
+    ```
+    tests/scripts/test-endpoints.sh
+    ```
+
+    For gRPC:
+    ```
+    tests/scripts/test-endpoints-grpc.sh
+    ```
+
+4. Delete model
+    ```
+    tests/scripts/delete-model.sh
+    ```

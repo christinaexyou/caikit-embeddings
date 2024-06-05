@@ -60,7 +60,8 @@ class testEmbeddings:
             model_output = self.model.encode(text)
 
             np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
-        print(response.text)
+        else:
+            print(response.text)
 
     def embeddingTasks_test(self, texts: List[str]):
         """
@@ -78,7 +79,8 @@ class testEmbeddings:
             inference_response = response.json()['results']['vectors'][0]['data']['values']
             model_output = self.model.encode(texts)[0]
             np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
-        print(response.text)
+        else:
+            print(response.text)
 
     def sentenceSimilarityTask_test(self, source_sentence: str, sentences: List[str]):
         """
@@ -101,9 +103,9 @@ class testEmbeddings:
                 self.model.encode(source_sentence),
                 self.model.encode(sentences)
             ).flatten()
-
             np.testing.assert_almost_equal(inference_response, model_output, decimal=3)
-        print(response.text)
+        else:
+            print(response.text)
 
     def sentenceSimilarityTasks_test(self, source_sentences: List[str], sentences: List[str]):
         """
@@ -128,7 +130,8 @@ class testEmbeddings:
                 ).flatten()
 
             np.testing.assert_almost_equal(scores, model_output, decimal=3)
-        print(response.text)
+        else:
+            print(response.text)
 
     def rerankTask_test(self, query: str,  documents: List[JsonDict], top_n=None):
         """
@@ -176,7 +179,8 @@ class testEmbeddings:
 
             np.testing.assert_equal(corpus_ids, [res['corpus_id'] for res in results])
             np.testing.assert_almost_equal(scores, [res['score'] for res in results], decimal=3)
-        print(response.text)
+        else:
+            print(response.text)
 
     def rerankTasks_test(self, queries: List[str], documents: List[JsonDict], top_n=None):
         """
@@ -213,7 +217,8 @@ class testEmbeddings:
 
             np.testing.assert_equal(corpus_ids, [doc['corpus_id'] for res in results for doc in res])
             np.testing.assert_almost_equal(scores, [doc['score'] for res in results for doc in res], decimal=3)
-        print(response.text)
+        else:
+            print(response.text)
 
 if __name__=="__main__":
     model_id, model_name_or_path, isvc_url = _parse_args()

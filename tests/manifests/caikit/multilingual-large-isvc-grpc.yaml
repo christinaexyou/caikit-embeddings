@@ -5,13 +5,12 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: "true"
     sidecar.istio.io/inject: "true"
     sidecar.istio.io/rewriteAppHTTPProbers: "true"
-  name: <ISVC_NAME>
+  name: multilingual-large-caikit
 spec:
   predictor:
     serviceAccountName: sa
     model:
       modelFormat:
         name: caikit
-      runtime: caikit-standalone-runtime
-      storageUri: <MODEL_PATH>
-
+      runtime: caikit-standalone-runtime-grpc
+      storageUri: s3://modelmesh-example-models/models/microsoft/

@@ -5,7 +5,7 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: "true"
     sidecar.istio.io/inject: "true"
     sidecar.istio.io/rewriteAppHTTPProbers: "true"
-  name: <ISVC_NAME>
+  name: bge-large-en-caikit
 spec:
   predictor:
     serviceAccountName: sa
@@ -13,5 +13,4 @@ spec:
       modelFormat:
         name: caikit
       runtime: caikit-standalone-runtime
-      storageUri: <MODEL_PATH>
-
+      storageUri: s3://modelmesh-example-models/models/baai/

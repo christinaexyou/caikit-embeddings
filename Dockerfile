@@ -27,9 +27,6 @@ RUN chown -R 1000:0 /data1 && \
     chgrp -R 0 /data1 && \
     chmod -R g=u /data1
 
-COPY --chown=1000:0  models/hf ${MODEL_DIR}/models/hf/
-COPY --chown=1000:0  models/baai ${MODEL_DIR}/models/baai/
-COPY --chown=1000:0  models/microsoft ${MODEL_DIR}/models/microsoft/
-# COPY --chown=1000:0 <YOURMODEL> ${MODEL_DIR}
+COPY --chown=1000:0 <YOURMODEL> ${MODEL_DIR}
 
 USER 1000

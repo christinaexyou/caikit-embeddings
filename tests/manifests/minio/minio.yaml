@@ -24,9 +24,9 @@ spec:
         - /data1
       env:
         - name: MINIO_ACCESS_KEY
-          value:  adming
+          value:  admin
         - name: MINIO_SECRET_KEY
           value: password
-      image: quay.io/<QUAY_USERNAME>/modelmesh-minio-examples:<MODEL_NAME>
+      image: quay.io/christinaexyou/modelmesh-minio-examples:embedding-models
       imagePullPolicy: Always
       name: minio
