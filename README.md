@@ -132,11 +132,7 @@ The following open source embeddings models have already been containerized [her
     export TARGET_OPERATOR=rhods
     ```
 
-2. Install the required libraries
-    ```
-    pip install -q tests/requirements.txt
-    ```
-3. Deploy embeddings models
+2. Deploy embeddings models
 
     For HTTP:
     ```
@@ -148,7 +144,7 @@ The following open source embeddings models have already been containerized [her
     tests/scripts/deploy-model.sh grpc
     ```
 
-4. Validate inference responses
+3. Validate inference responses
 
     For HTTP:
     ```
@@ -160,7 +156,7 @@ The following open source embeddings models have already been containerized [her
     tests/scripts/test-endpoints-grpc.sh
     ```
 
-5. Delete model
+4. Delete model
     ```
     tests/scripts/delete-model.sh
     ```

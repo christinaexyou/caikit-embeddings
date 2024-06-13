@@ -5,6 +5,8 @@ set -o errtrace
 source "$(dirname "$(realpath "$0")")/env.sh"
 source "$(dirname "$(realpath "$0")")/utils.sh"
 
+echo "Installing required Python libraries"
+pip install -r ./tests/requirements.txt
 echo
 echo "Wait until grpc endpoint is READY"
 

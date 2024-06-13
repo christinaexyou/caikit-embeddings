@@ -5,12 +5,17 @@ set -o errtrace
 source "$(dirname "$(realpath "$0")")/env.sh"
 source "$(dirname "$(realpath "$0")")/utils.sh"
 
+echo "Installing required Python libraries"
+pip install -r ./tests/requirements.txt
 echo
 echo "Wait until HTTP runtime is READY"
 
 ISVC_NAMES=(all-minilm-caikit bge-large-en-caikit multilingual-large-caikit)
 MODEL_IDS=(all-MiniLM-L12-v2-caikit bge-large-en-v1.5-caikit multilingual-e5-large-caikit)
 MODEL_NAMES=(sentence-transformers/all-MiniLM-L12-v2 BAAI/bge-large-en-v1.5 intfloat/multilingual-e5-large)
+
+# install required Python libraries
+pip install -r ./tests/requirements.txt
 
 for i in "${!ISVC_NAMES[@]}"
 do
